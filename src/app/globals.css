@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+:root {
+  /* Dark Luxury Editorial Palette (matching reference) */
+  --bg-primary: #0E0A08;
+  --bg-surface: #17110E;
+  --bg-surface-elevated: #211915;
+  --bg-surface-subtle: #2C221D;
+  
+  --text-primary: #F7F4EF;
+  --text-secondary: #C4B9AD;
+  --text-muted: #8E8276;
+  --text-inverse: #0E0A08;
+  
+  --accent-gold: #B88B58;
+  --accent-gold-hover: #CBA06E;
+  --accent-gold-light: #E5CBA8;
+  --accent-gold-dark: #8F6536;
+  --accent-gold-subtle: rgba(184, 139, 88, 0.15);
+
+  --accent-primary: #E2481F;
+  --accent-coffee: #9E744A;
+  
+  --border-subtle: rgba(247, 244, 239, 0.08);
+  --border-medium: rgba(184, 139, 88, 0.25);
+  --border-strong: rgba(184, 139, 88, 0.5);
+
+  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(184, 139, 88, 0.15);
+  --shadow-glow: 0 0 40px -10px rgba(184, 139, 88, 0.25);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+}
+
+@theme inline {
+  --color-canvas: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-surface-elevated: var(--bg-surface-elevated);
+  --color-surface-subtle: var(--bg-surface-subtle);
+  
+  --color-content: var(--text-primary);
+  --color-content-secondary: var(--text-secondary);
+  --color-content-muted: var(--text-muted);
+  
+  --color-gold: var(--accent-gold);
+  --color-gold-hover: var(--accent-gold-hover);
+  --color-gold-subtle: var(--accent-gold-subtle);
+  
+  --font-script: var(--font-script);
+  --font-display: var(--font-display);
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+/* Glassmorphism Header & Panels */
+.glass-header {
+  background: rgba(14, 10, 8, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.glass-card-dark {
+  background: rgba(24, 17, 13, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(184, 139, 88, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-dark:hover {
+  border-color: rgba(184, 139, 88, 0.4);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(184, 139, 88, 0.15);
+  transform: translateY(-3px);
+}
+
+/* Script Font Utility */
+.font-cursive {
+  font-family: var(--font-script), 'Caveat', cursive;
+}
+
+/* Category Special Effects & Living Fire Aura */
+
+@keyframes flamePlasma {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes emberRise {
+  0% {
+    transform: translateY(0) scale(0.6) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-80px) scale(1.2) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fireTongueFlicker {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scaleY(1) scaleX(1);
+  }
+  25% {
+    opacity: 0.95;
+    transform: scaleY(1.08) scaleX(0.96) translateX(1px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleY(0.95) scaleX(1.02);
+  }
+  75% {
+    opacity: 1;
+    transform: scaleY(1.12) scaleX(0.98) translateX(-1px);
+  }
+}
+
+/* Fire Card Container Wrapper */
+.living-fire-container {
+  position: relative;
+}
+
+.living-fire-container::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 1.6rem;
+  background: linear-gradient(
+    135deg,
+    #ff1a00,
+    #ff6600,
+    #ff9900,
+    #ff3300,
+    #ff0033,
+    #ffaa00,
+    #ff2200
+  );
+  background-size: 300% 300%;
+  animation: flamePlasma 4s ease infinite;
+  z-index: 0;
+  opacity: 0.85;
+  filter: blur(1px);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.living-fire-container:hover::before {
+  opacity: 1;
+  filter: blur(2px);
+  animation: flamePlasma 2.5s ease infinite;
+}
+
+.living-fire-container::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 1.8rem;
+  background: radial-gradient(circle at 50% 100%, rgba(255, 68, 0, 0.45) 0%, rgba(255, 140, 0, 0.2) 45%, transparent 70%);
+  z-index: -1;
+  opacity: 0.7;
+  filter: blur(12px);
+  pointer-events: none;
+  animation: fireTongueFlicker 3s ease-in-out infinite;
+}
+
+.living-fire-container:hover::after {
+  opacity: 1;
+  filter: blur(18px);
+}
+
+@keyframes coffeeAura {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.3), inset 0 0 15px rgba(217, 119, 6, 0.1);
+    border-color: rgba(217, 119, 6, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(245, 158, 11, 0.5), inset 0 0 20px rgba(217, 119, 6, 0.2);
+    border-color: rgba(245, 158, 11, 0.8);
+  }
+}
+
+.card-coffee-border {
+  border-color: rgba(184, 139, 88, 0.35);
+  transition: all 0.4s ease;
+}
+
+.card-coffee-border:hover {
+  animation: coffeeAura 3s ease-in-out infinite;
+  border-color: #D97706;
+}
+
+.card-sweets-border {
+  border-color: rgba(236, 72, 153, 0.25);
+  transition: all 0.4s ease;
+}
+
+.card-sweets-border:hover {
+  box-shadow: 0 0 28px rgba(236, 72, 153, 0.4), 0 0 14px rgba(16, 185, 129, 0.3);
+  border-color: rgba(236, 72, 153, 0.7);
+}
+
+.card-snacks-border {
+  border-color: rgba(234, 179, 8, 0.25);
+  transition: all 0.4s ease;
+}
+
+.card-snacks-border:hover {
+  box-shadow: 0 0 28px rgba(234, 179, 8, 0.45);
+  border-color: rgba(234, 179, 8, 0.7);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0E0A08;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #33251E;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B88B58;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+

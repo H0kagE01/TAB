@@ -1,0 +1,307 @@
+// Prisma Schema for Конфетница / ТАВ Specialty Coffee Roasters
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =========================================================================
+// 1. ПОЛЬЗОВАТЕЛИ И АВТОРИЗАЦИЯ
+// =========================================================================
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         Role      @default(ADMIN)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// =========================================================================
+// 2. СТРАНИЦЫ И БЛОКИ (PAGE BUILDER)
+// =========================================================================
+model Page {
+  id             String      @id @default(cuid())
+  slug           String      @unique // e.g. "home", "about", "coffee", "contacts", "privacy"
+  title          String      // Внутреннее имя страницы
+  seoTitle       String?     @map("seo_title")
+  seoDescription String?     @map("seo_description")
+  seoKeywords    String?     @map("seo_keywords")
+  ogImage        String?     @map("og_image")
+  isPublished    Boolean     @default(true) @map("is_published")
+  blocks         PageBlock[]
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@map("pages")
+}
+
+model PageBlock {
+  id        String   @id @default(cuid())
+  pageId    String   @map("page_id")
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  blockType String   @map("block_type") // "hero", "directions", "featured_products", "collections_grid", "about_snippet", "stores_section", "roast_guide", "quality_standards", "contacts_boutique", "wholesale_banner", "rich_text"
+  name      String   // Название блока для админки (например: "Главный баннер", "Сетка новинок")
+  order     Int      @default(0) // Порядок отображения
+  isActive  Boolean  @default(true) @map("is_active")
+  content   Json     // Структурированный контент блока (заголовки, бейджи, ссылки, фото, тексты)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([pageId, order])
+  @@map("page_blocks")
+}
+
+// =========================================================================
+// 3. КАТАЛОГ И СПЕШЕЛТИ КОФЕ
+// =========================================================================
+model Category {
+  id               String    @id @default(cuid())
+  slug             String    @unique // "single-origin", "espresso-blends", "drip-coffee", "accessories", "sets"
+  name             String    // "Моносорта", "Эспрессо-бленды", "Дрип-пакеты"
+  shortDescription String?   @map("short_description")
+  longDescription  String?   @map("long_description")
+  imageUrl         String?   @map("image_url")
+  accentColor      String?   @map("accent_color")
+  order            Int       @default(0)
+  isActive         Boolean   @default(true) @map("is_active")
+  products         Product[]
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Country {
+  id        String    @id @default(cuid())
+  code      String    @unique // ISO 2-буквенный (ET, CO, KE, CR, BR, GT)
+  name      String    // "Эфиопия", "Колумбия", "Кения"
+  slug      String    @unique
+  flagEmoji String?   @map("flag_emoji") // "🇪🇹", "🇨🇴"
+  products  Product[]
+  brands    Brand[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("countries")
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    // "ТАВ", "Hario", "Timemore", "Acaia"
+  slug        String    @unique
+  description String?
+  logoUrl     String?   @map("logo_url")
+  countryId   String?   @map("country_id")
+  country     Country?  @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("brands")
+}
+
+model Product {
+  id               String              @id @default(cuid())
+  slug             String              @unique
+  title            String
+  categoryId       String              @map("category_id")
+  category         Category            @relation(fields: [categoryId], references: [id])
+  brandId          String?             @map("brand_id")
+  brand            Brand?              @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  countryId        String?             @map("country_id")
+  country          Country?            @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  price            Decimal             @db.Decimal(10, 2)
+  oldPrice         Decimal?            @map("old_price") @db.Decimal(10, 2)
+  inStock          Boolean             @default(true) @map("in_stock")
+  stockCount       Int                 @default(0) @map("stock_count")
+  shortDescription String?             @map("short_description")
+  description      String              @db.Text
+  images           Json                // string[] список URL изображений
+  isNew            Boolean             @default(false) @map("is_new")
+  isPopular        Boolean             @default(false) @map("is_popular")
+  isFeatured       Boolean             @default(false) @map("is_featured")
+  order            Int                 @default(0)
+  publishedAt      DateTime            @default(now()) @map("published_at")
+  
+  // Характеристики кофе (1:1)
+  coffeeSpecs      CoffeeSpecs?
+  
+  // Связи с подборками и заказами
+  collections      CollectionProduct[]
+  inquiryItems     InquiryItem[]
+
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@index([isPopular, isNew, isFeatured])
+  @@map("products")
+}
+
+model CoffeeSpecs {
+  id              String   @id @default(cuid())
+  productId       String   @unique @map("product_id")
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  variety         String?  // Сорт / Разновидность ("100% Арабика (Эфиопское наследие)")
+  roastLevel      String?  @map("roast_level") // "light", "medium", "dark"
+  processing      String?  // "Мытая (Washed)", "Натуральная (Natural)", "Анаэробная"
+  altitude        String?  // "1 900 – 2 200 м"
+  qScore          Decimal? @map("q_score") @db.Decimal(3, 1) // 87.5
+  flavorNotes     Json?    @map("flavor_notes") // string[]: ["Бергамот", "Жасмин", "Персик", "Лайм"]
+  recommendedBrew Json?    @map("recommended_brew") // string[]: ["V60", "Кемекс", "Аэропресс"]
+  
+  // Оценки вкусового профиля (1-5)
+  acidity         Int?     // Кислотность
+  sweetness       Int?     // Сладость
+  bitterness      Int?     // Горечь
+  body            Int?     // Плотность / Тело
+  
+  weightGrams     Int?     @map("weight_grams") // 250, 500, 1000
+  dripCount       Int?     @map("drip_count") // 10 шт
+  
+  // Рецепт экстракции и заваривания
+  recipe          Json?    // { title, subtitle, badge, ratio, ratioDesc, temp, tempDesc, grind, grindDesc, time, timeDesc, steps: string[] | { title?: string, text: string }[] }
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("coffee_specs")
+}
+
+model Collection {
+  id          String              @id @default(cuid())
+  slug        String              @unique // "drip-coffee-sets", "espresso-lovers"
+  title       String              // "Дрип-кофе на каждый день"
+  description String              @db.Text
+  badgeText   String?             @map("badge_text") // "Хит сезона"
+  coverImage  String              @map("cover_image")
+  order       Int                 @default(0)
+  products    CollectionProduct[]
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  @@map("collections")
+}
+
+model CollectionProduct {
+  id           String     @id @default(cuid())
+  collectionId String     @map("collection_id")
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  productId    String     @map("product_id")
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order        Int        @default(0)
+
+  @@unique([collectionId, productId])
+  @@map("collection_products")
+}
+
+// =========================================================================
+// 4. ЛОКАЦИИ / КОФЕЙНИ
+// =========================================================================
+model Store {
+  id             String    @id @default(cuid())
+  name           String    // "Пространство ТАВ в Майкопе"
+  city           String    // "Майкоп"
+  address        String    // "ул. К.А. Васильева, 2/1"
+  phone          String    // "+7 (900) 000-00-00"
+  formattedPhone String    @map("formatted_phone") // "+79000000000"
+  workingHours   String    @map("working_hours") // "Ежедневно: 08:00 – 21:00"
+  latitude       Decimal   @db.Decimal(10, 7)
+  longitude      Decimal   @db.Decimal(10, 7)
+  photoUrl       String    @map("photo_url")
+  isMain         Boolean   @default(false) @map("is_main")
+  description    String?   @db.Text
+  inquiries      Inquiry[]
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("stores")
+}
+
+// =========================================================================
+// 5. ЗАЯВКИ И ЗАКАЗЫ ИЗ КОРЗИНЫ
+// =========================================================================
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Inquiry {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique @map("order_number") // e.g. "TAV-1001"
+  customerName    String        @map("customer_name")
+  customerPhone   String        @map("customer_phone")
+  customerComment String?       @map("customer_comment") @db.Text
+  grindType       String?       @map("grind_type") // "beans", "espresso", "filter", "turka", "moka", "french-press"
+  storeId         String?       @map("store_id")
+  store           Store?        @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  status          InquiryStatus @default(NEW)
+  totalAmount     Decimal       @default(0) @map("total_amount") @db.Decimal(10, 2)
+  items           InquiryItem[]
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@map("inquiries")
+}
+
+model InquiryItem {
+  id           String   @id @default(cuid())
+  inquiryId    String   @map("inquiry_id")
+  inquiry      Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  productId    String   @map("product_id")
+  product      Product  @relation(fields: [productId], references: [id])
+  productTitle String   @map("product_title")
+  price        Decimal  @db.Decimal(10, 2)
+  quantity     Int      @default(1)
+  grindType    String?  @map("grind_type")
+
+  @@map("inquiry_items")
+}
+
+// =========================================================================
+// 6. ГЛОБАЛЬНЫЕ НАСТРОЙКИ САЙТА И МЕДИАТЕКА
+// =========================================================================
+model SiteSetting {
+  id          String   @id @default("global")
+  siteName    String   @default("ТАВ Coffee") @map("site_name")
+  siteTagline String   @default("Спешелти кофе свежей обжарки") @map("site_tagline")
+  logoUrl     String   @default("/images/logo.jpg") @map("logo_url")
+  mainPhone   String   @default("+7 (900) 000-00-00") @map("main_phone")
+  telegramUrl String   @default("https://t.me/tav_coffee") @map("telegram_url")
+  whatsappUrl String?  @map("whatsapp_url")
+  email       String?
+  headerMenu  Json     // пункты меню в шапке
+  footerText  String?  @map("footer_text") @db.Text
+  defaultSeo  Json?    @map("default_seo")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  alt       String?
+  mimeType  String   @map("mime_type")
+  sizeBytes Int      @map("size_bytes")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("media")
+}
