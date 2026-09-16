@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+
 import { Outfit, Plus_Jakarta_Sans, Caveat } from 'next/font/google';
 import './globals.css';
 import { PublicLayoutShell } from '@/components/common/PublicLayoutShell';
