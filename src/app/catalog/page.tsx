@@ -13,8 +13,6 @@ import {
 import { getPageWithBlocks } from '@/lib/db/pages';
 import { Sparkles, Coffee } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPageWithBlocks('catalog');
   return {
