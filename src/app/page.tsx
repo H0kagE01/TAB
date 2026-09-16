@@ -1,5 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+
 import { HeroSection } from '@/components/hero/HeroSection';
 import { DirectionsBlock } from '@/components/directions/DirectionsBlock';
 import { FeaturedProducts } from '@/components/catalog/FeaturedProducts';

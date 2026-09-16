@@ -1,5 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Coffee, Sparkles, Droplets, ShieldCheck, Heart, Award } from 'lucide-react';

@@ -1,5 +1,8 @@
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+
 import { CatalogClient } from '@/components/catalog/CatalogClient';
 import {
   getFilteredProducts,
