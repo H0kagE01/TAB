@@ -2,30 +2,15 @@ import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
-import { Outfit, Plus_Jakarta_Sans, Caveat } from 'next/font/google';
 import './globals.css';
 import { PublicLayoutShell } from '@/components/common/PublicLayoutShell';
 import { getMainStore } from '@/lib/db/stores';
 import { getSiteSettings } from '@/lib/db/settings';
 
-const fontSans = Plus_Jakarta_Sans({
-  variable: '--font-sans',
-  subsets: ['latin', 'cyrillic-ext'],
-  display: 'swap',
-});
+const fontSans = { variable: 'font-sans' };
+const fontDisplay = { variable: 'font-display' };
+const fontScript = { variable: 'font-script' };
 
-const fontDisplay = Outfit({
-  variable: '--font-display',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const fontScript = Caveat({
-  variable: '--font-script',
-  subsets: ['latin', 'cyrillic'],
-  display: 'swap',
-  weight: ['400', '600', '700'],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tav-coffee.ru'),
